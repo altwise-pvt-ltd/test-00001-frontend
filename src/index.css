@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* Design tokens — exposed as Tailwind utilities (text-text-h, bg-accent-bg,
+   border-border, shadow-card, font-mono, …). Edit colors here once. */
+@theme {
+  --color-text: #6b6375;
+  --color-text-h: #08060d;
+  --color-bg: #ffffff;
+  --color-border: #e5e4e7;
+  --color-code-bg: #f4f3ec;
+  --color-accent: #aa3bff;
+  --color-accent-bg: rgba(170, 59, 255, 0.1);
+  --color-accent-border: rgba(170, 59, 255, 0.5);
+  --color-social-bg: rgba(244, 243, 236, 0.5);
+
+  --font-sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+
+  --shadow-card:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
+
+/* Dark palette: override the same token variables so every utility that
+   references them adapts automatically (no `dark:` variant needed). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #9ca3af;
+    --color-text-h: #f3f4f6;
+    --color-bg: #16171d;
+    --color-border: #2e303a;
+    --color-code-bg: #1f2028;
+    --color-accent: #c084fc;
+    --color-accent-bg: rgba(192, 132, 252, 0.15);
+    --color-accent-border: rgba(192, 132, 252, 0.5);
+    --color-social-bg: rgba(47, 48, 58, 0.5);
+    --shadow-card:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font: 18px/145% var(--font-sans);
+    letter-spacing: 0.18px;
+  }
+
+  @media (max-width: 1024px) {
+    body {
+      font-size: 16px;
+    }
+  }
+}
