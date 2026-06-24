@@ -3,7 +3,7 @@ import { Modal } from '../../../shared/components/Modal';
 import { useAuthStore } from '../../auth';
 import { getApiErrorMessage } from '../../../shared/apiError';
 import { createAssignment, updateAssignment } from '../services/assignments';
-import { listTeachingAssignments } from '../services/teachingAssignments';
+import { listSubjectAllocations } from '../services/subjectAllocations';
 
 const inputCls =
   'w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-text-h outline-none transition focus:border-accent-border disabled:opacity-50';
@@ -15,7 +15,7 @@ const TYPES = [
   { value: 'book', label: 'Book' },
 ];
 
-const EMPTY = { teachingAssignmentId: '', title: '', type: 'homework', description: '', dueDate: '', attachments: '' };
+const EMPTY = { subjectAllocationId: '', title: '', type: 'homework', description: '', dueDate: '', attachments: '' };
 
 // ISO date → yyyy-mm-dd for a <input type="date">.
 function toDateInput(iso) {
@@ -32,24 +32,24 @@ const parseAttachments = (text) =>
     .map((a) => a.trim())
     .filter(Boolean);
 
-const taLabel = (ta) => {
-  const subject = ta.subjectId?.name ?? 'Subject';
-  const code = ta.subjectId?.code ? ` (${ta.subjectId.code})` : '';
-  const section = ta.sectionId?.name ?? '—';
+const allocLabel = (alloc) => {
+  const subject = alloc.subjectId?.name ?? 'Subject';
+  const code = alloc.subjectId?.code ? ` (${alloc.subjectId.code})` : '';
+  const section = alloc.sectionId?.name ?? '—';
   return `${subject}${code} · Section ${section}`;
 };
 
 // Create/edit form for an assignment (teacher). On create the teacher picks one
-// of their teaching assignments (subject + section); the backend derives the
-// section from it. On edit the teaching assignment is fixed — only the content
+// of their subject allocations (subject + section); the backend derives the
+// section from it. On edit the subject allocation is fixed — only the content
 // fields change. `scopeLabel` is the already-resolved "Subject · Section" shown
 // read-only when editing. Calls onSaved(savedAssignment) on success.
 export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabel }) {
   const isEdit = Boolean(initial);
   const myId = useAuthStore((s) => s.user?.id ?? s.user?._id);
   const [form, setForm] = useState(EMPTY);
-  const [tas, setTas] = useState([]);
-  const [loadingTas, setLoadingTas] = useState(false);
+  const [allocations, setAllocations] = useState([]);
+  const [loadingAllocs, setLoadingAllocs] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -62,7 +62,7 @@ export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabe
     setForm(
       initial
         ? {
-            teachingAssignmentId: initial.teachingAssignmentId?._id ?? initial.teachingAssignmentId ?? '',
+            subjectAllocationId: initial.subjectAllocationId?._id ?? initial.subjectAllocationId ?? '',
             title: initial.title ?? '',
             type: initial.type ?? 'homework',
             description: initial.description ?? '',
@@ -73,15 +73,15 @@ export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabe
     );
   }, [open, initial]);
 
-  // Load the teacher's teaching assignments for the picker (create only).
+  // Load the teacher's subject allocations for the picker (create only).
   useEffect(() => {
     if (!open || isEdit || !myId) return undefined;
     let active = true;
-    setLoadingTas(true);
-    listTeachingAssignments({ teacherId: myId })
-      .then((data) => active && setTas(Array.isArray(data) ? data : []))
-      .catch(() => active && setTas([]))
-      .finally(() => active && setLoadingTas(false));
+    setLoadingAllocs(true);
+    listSubjectAllocations({ teacherId: myId })
+      .then((data) => active && setAllocations(Array.isArray(data) ? data : []))
+      .catch(() => active && setAllocations([]))
+      .finally(() => active && setLoadingAllocs(false));
     return () => {
       active = false;
     };
@@ -91,7 +91,7 @@ export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabe
     e.preventDefault();
     const title = form.title.trim();
     if (title.length < 2) return setError('Enter a title (at least 2 characters).');
-    if (!isEdit && !form.teachingAssignmentId) {
+    if (!isEdit && !form.subjectAllocationId) {
       return setError('Choose which subject and section this assignment is for.');
     }
 
@@ -108,7 +108,7 @@ export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabe
     try {
       const saved = isEdit
         ? await updateAssignment(initial._id, base)
-        : await createAssignment({ ...base, teachingAssignmentId: form.teachingAssignmentId });
+        : await createAssignment({ ...base, subjectAllocationId: form.subjectAllocationId });
       onSaved(saved);
       onClose();
     } catch (err) {
@@ -130,23 +130,23 @@ export function AssignmentFormModal({ open, onClose, onSaved, initial, scopeLabe
           ) : (
             <select
               id="a-ta"
-              value={form.teachingAssignmentId}
-              onChange={set('teachingAssignmentId')}
-              disabled={loadingTas}
+              value={form.subjectAllocationId}
+              onChange={set('subjectAllocationId')}
+              disabled={loadingAllocs}
               className={inputCls}
             >
-              <option value="">{loadingTas ? 'Loading…' : 'Select…'}</option>
-              {tas.map((ta) => (
-                <option key={ta._id} value={ta._id}>
-                  {taLabel(ta)}
+              <option value="">{loadingAllocs ? 'Loading…' : 'Select…'}</option>
+              {allocations.map((alloc) => (
+                <option key={alloc._id} value={alloc._id}>
+                  {allocLabel(alloc)}
                 </option>
               ))}
             </select>
           )}
-          {!isEdit && !loadingTas && tas.length === 0 && (
+          {!isEdit && !loadingAllocs && allocations.length === 0 && (
             <p className="mt-1 text-xs text-amber-600">
-              You aren't assigned to teach any subject yet. Ask your principal to set up a teaching
-              assignment first.
+              You aren't assigned to teach any subject yet. Ask your principal to set up a subject
+              allocation first.
             </p>
           )}
         </div>

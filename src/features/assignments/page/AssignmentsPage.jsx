@@ -10,21 +10,21 @@ import { useAuthStore, useRole } from '../../auth';
 import { fmtDate } from '../../../shared/format';
 import { listAssignments, deleteAssignment } from '../services/assignments';
 import { listSubmissions } from '../services/submissions';
-import { listTeachingAssignments } from '../services/teachingAssignments';
+import { listSubjectAllocations } from '../services/subjectAllocations';
 import { AssignmentFormModal } from '../components/AssignmentFormModal';
 import { AssignmentDetailModal } from '../components/AssignmentDetailModal';
 
 const idStr = (v) => (v && typeof v === 'object' ? String(v._id ?? v.id ?? '') : v != null ? String(v) : '');
 
-// Build a lookup: teachingAssignmentId -> { subject, code, section } from a
-// teaching-assignment list (populated with subject name/code + section name).
-function buildTaMap(tas) {
+// Build a lookup: subjectAllocationId -> { subject, code, section } from a
+// subject-allocation list (populated with subject name/code + section name).
+function buildAllocMap(allocations) {
   const map = new Map();
-  for (const ta of tas || []) {
-    map.set(String(ta._id), {
-      subject: ta.subjectId?.name,
-      code: ta.subjectId?.code,
-      section: ta.sectionId?.name,
+  for (const alloc of allocations || []) {
+    map.set(String(alloc._id), {
+      subject: alloc.subjectId?.name,
+      code: alloc.subjectId?.code,
+      section: alloc.sectionId?.name,
     });
   }
   return map;
@@ -40,7 +40,7 @@ export function AssignmentsPage() {
   const mySectionId = user?.sectionId ?? null;
 
   const [assignments, setAssignments] = useState(null); // null = loading
-  const [taMap, setTaMap] = useState(() => new Map());
+  const [allocMap, setAllocMap] = useState(() => new Map());
   const [subsByAssignment, setSubsByAssignment] = useState(() => new Map()); // student: assignmentId -> submission
   const [error, setError] = useState('');
 
@@ -52,17 +52,17 @@ export function AssignmentsPage() {
   const load = useCallback(async () => {
     setError('');
     try {
-      const [list, tas, subs] = await Promise.all([
+      const [list, allocations, subs] = await Promise.all([
         listAssignments(),
         isTeacher
-          ? listTeachingAssignments({ teacherId: myId })
+          ? listSubjectAllocations({ teacherId: myId })
           : isStudent && mySectionId
-            ? listTeachingAssignments({ sectionId: mySectionId })
+            ? listSubjectAllocations({ sectionId: mySectionId })
             : Promise.resolve([]),
         isStudent ? listSubmissions() : Promise.resolve([]),
       ]);
       setAssignments(Array.isArray(list) ? list : []);
-      setTaMap(buildTaMap(tas));
+      setAllocMap(buildAllocMap(allocations));
       const m = new Map();
       for (const s of subs || []) m.set(idStr(s.assignmentId), s);
       setSubsByAssignment(m);
@@ -80,12 +80,12 @@ export function AssignmentsPage() {
   // back to the populated section name on the assignment itself.
   const scopeOf = useMemo(
     () => (a) => {
-      const ta = taMap.get(idStr(a.teachingAssignmentId));
-      const section = a.sectionId?.name ?? ta?.section;
-      const subject = ta?.subject ? `${ta.subject}${ta.code ? ` (${ta.code})` : ''}` : null;
+      const alloc = allocMap.get(idStr(a.subjectAllocationId));
+      const section = a.sectionId?.name ?? alloc?.section;
+      const subject = alloc?.subject ? `${alloc.subject}${alloc.code ? ` (${alloc.code})` : ''}` : null;
       return [subject, section ? `Section ${section}` : null].filter(Boolean).join(' · ');
     },
-    [taMap]
+    [allocMap]
   );
 
   function handleSaved() {

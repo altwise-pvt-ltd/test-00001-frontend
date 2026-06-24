@@ -94,19 +94,19 @@ export function TeacherDetailModal({ open, teacherId, onClose }) {
           </DetailSection>
 
           <DetailSection
-            title="Teaching assignments"
-            count={data.teachingAssignments?.length}
-            empty="No teaching assignments"
+            title="Subject allocations"
+            count={data.subjectAllocations?.length}
+            empty="No subject allocations"
           >
             <ul className="space-y-2">
-              {data.teachingAssignments?.map((ta) => (
+              {data.subjectAllocations?.map((alloc) => (
                 <li
-                  key={ta.id}
+                  key={alloc.id}
                   className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
                 >
-                  <span className="font-medium text-text-h">{ta.subject?.name}</span>
+                  <span className="font-medium text-text-h">{alloc.subject?.name}</span>
                   <span className="text-text/60">
-                    Class {ta.classLevel} · Section {ta.section?.name}
+                    Class {alloc.classLevel} · Section {alloc.section?.name}
                   </span>
                 </li>
               ))}

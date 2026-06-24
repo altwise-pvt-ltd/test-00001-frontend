@@ -20,9 +20,14 @@ export async function bootstrapSession() {
 }
 
 // Current user (sanitized) — used to populate role/profile after auth.
+// The backend names the platform role 'super-admin', but the whole frontend
+// (router, navItems, useRole) is coded against 'admin'. Normalize once here so
+// that single convention holds everywhere downstream.
 export async function fetchMe() {
   const { data } = await client.get('/auth/me');
-  return data.data;
+  const user = data.data;
+  if (user?.role === 'super-admin') return { ...user, role: 'admin' };
+  return user;
 }
 
 // Role-aware dashboard payload.

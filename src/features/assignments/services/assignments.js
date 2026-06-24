@@ -9,7 +9,7 @@ function unwrapList(data) {
 
 // GET /assignments — the backend auto-scopes by role (a student sees their own
 // section, a teacher sees what they teach). Optional { sectionId } filter. The
-// response populates teachingAssignmentId (teacher/subject/section ids) and
+// response populates subjectAllocationId (teacher/subject/section ids) and
 // sectionId (name).
 export async function listAssignments(params = {}) {
   const { data } = await http.get('/assignments', { params });
@@ -21,8 +21,8 @@ export async function getAssignment(id) {
   return data.data;
 }
 
-// POST /assignments (teacher only). The section is inherited from the teaching
-// assignment, so the client sends teachingAssignmentId, not a section.
+// POST /assignments (teacher only). The section is inherited from the subject
+// allocation, so the client sends subjectAllocationId, not a section.
 export async function createAssignment(payload) {
   const { data } = await http.post('/assignments', payload);
   return data.data;

@@ -7,6 +7,7 @@ export function useRole() {
   const role = useAuthStore((s) => s.user?.role) ?? null;
   return {
     role,
+    isAdmin: role === 'admin',
     isPrincipal: role === 'principal',
     isTeacher: role === 'teacher',
     isStudent: role === 'student',

@@ -5,7 +5,7 @@ import { getApiErrorMessage } from '../../../shared/apiError';
 import { createStudent, updateStudent, userId } from '../services/students';
 import { listClasses } from '../../classes';
 import { listSections } from '../../sections';
-import { listTeachingAssignments } from '../../assignments';
+import { listSubjectAllocations } from '../../assignments';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMPTY = { name: '', email: '', dateOfBirth: '', classId: '', sectionId: '' };
@@ -20,8 +20,8 @@ const idOf = (v) =>
 
 // Create/edit form for a student. On create a principal cascades class → section
 // to place the student; a teacher places them in one of THEIR OWN sections,
-// derived from their teaching assignments (teacher × subject × section, fetched
-// via GET /teaching-assignments?teacherId=). A section can recur across several
+// derived from their subject allocations (teacher × subject × section, fetched
+// via GET /subject-allocations?teacherId=). A section can recur across several
 // subjects, so we de-duplicate it. A teacher with a single section gets it
 // auto-selected (read-only); one with several gets a picker limited to just
 // those sections. On edit only name/email are sent. Calls onSaved(savedStudent)
@@ -95,7 +95,7 @@ export function StudentFormModal({ open, onClose, onSaved, initial }) {
     if (!open || isEdit || !isTeacher || !myId) return undefined;
     let active = true;
     setLoadingTeacherSections(true);
-    listTeachingAssignments({ teacherId: myId })
+    listSubjectAllocations({ teacherId: myId })
       .then((tas) => {
         if (!active) return undefined;
         // Distinct sectionIds the teacher teaches, preserving first-seen order.

@@ -13,18 +13,18 @@ const inputCls =
 
 const pairKey = (p) => `${p.subjectId}-${p.sectionId}`;
 
-// Map the teacher's existing teachingAssignments into our richer working set
+// Map the teacher's existing subjectAllocations into our richer working set
 // (carries display labels so we don't have to resolve ids back to names).
 function fromTeacher(teacher) {
-  return (teacher?.teachingAssignments ?? [])
-    .filter((ta) => ta.subject?.id && ta.section?.id)
-    .map((ta) => ({
-      subjectId: ta.subject.id,
-      sectionId: ta.section.id,
-      subjectName: ta.subject.name,
-      subjectCode: ta.subject.code,
-      sectionName: ta.section.name,
-      classLevel: ta.classLevel,
+  return (teacher?.subjectAllocations ?? [])
+    .filter((alloc) => alloc.subject?.id && alloc.section?.id)
+    .map((alloc) => ({
+      subjectId: alloc.subject.id,
+      sectionId: alloc.section.id,
+      subjectName: alloc.subject.name,
+      subjectCode: alloc.subject.code,
+      sectionName: alloc.section.name,
+      classLevel: alloc.classLevel,
     }));
 }
 

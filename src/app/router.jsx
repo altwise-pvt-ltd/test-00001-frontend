@@ -7,6 +7,8 @@ import { StudentsPage } from '../features/students'
 import { SectionsPage } from '../features/sections'
 import { SubjectsPage } from '../features/subjects'
 import { AssignmentsPage } from '../features/assignments'
+import { SchoolsPage } from '../features/schools'
+import { PrincipalsPage } from '../features/principals'
 import { ProtectedRoute } from '../shared/components/ProtectedRoute'
 import { DashboardLayout } from './layout/DashboardLayout'
 
@@ -27,6 +29,22 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <HomePage /> },
+      {
+        path: 'schools',
+        element: (
+          <ProtectedRoute roles={['admin']}>
+            <SchoolsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'principals',
+        element: (
+          <ProtectedRoute roles={['admin']}>
+            <PrincipalsPage />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'teachers',
         element: (

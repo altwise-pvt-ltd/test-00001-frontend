@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 // (features don't reach into each other's internals). Sign-out now lives in
 // the app shell's top bar, so this page only reads data.
 import { fetchHome, useAuthStore } from '../../auth';
+import { AdminHome } from '../../admin';
 import { PrincipalHome } from '../views/PrincipalHome';
 import { TeacherHome } from '../views/TeacherHome';
 import { StudentHome } from '../views/StudentHome';
@@ -10,6 +11,7 @@ import { StudentHome } from '../views/StudentHome';
 // Per-role header copy. The title slot is filled separately (school name for a
 // principal, a plain "Dashboard" otherwise); this is the subtitle line.
 const SUBTITLE = {
+  admin: "Welcome back — here's the platform at a glance.",
   principal: "Welcome back — here's your school at a glance.",
   teacher: "Welcome back — here's your teaching at a glance.",
   student: "Welcome back — here's your work at a glance.",
@@ -35,11 +37,15 @@ function RoleView({ home }) {
 
 export function HomePage() {
   const user = useAuthStore((s) => s.user);
+  // The super-admin has no /home payload — it renders its own platform view
+  // (self-fetching), so we skip the /home call entirely for that role.
+  const isAdmin = user?.role === 'admin';
 
   const [home, setHome] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (isAdmin) return undefined;
     let active = true;
     fetchHome()
       .then((data) => active && setHome(data))
@@ -47,7 +53,7 @@ export function HomePage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAdmin]);
 
   // Branch on the payload's role; fall back to the auth store only before the
   // payload has loaded (so the header badge shows something sensible meanwhile).
@@ -86,13 +92,19 @@ export function HomePage() {
         </p>
       )}
 
-      {!home && !error && (
-        <p className="text-sm text-text/70" role="status">
-          Loading dashboard…
-        </p>
-      )}
+      {isAdmin ? (
+        <AdminHome />
+      ) : (
+        <>
+          {!home && !error && (
+            <p className="text-sm text-text/70" role="status">
+              Loading dashboard…
+            </p>
+          )}
 
-      {home && <RoleView home={home} />}
+          {home && <RoleView home={home} />}
+        </>
+      )}
     </div>
   );
 }

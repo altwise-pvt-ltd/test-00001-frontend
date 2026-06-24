@@ -62,7 +62,7 @@ export function TeacherHome({ home }) {
           items={teaching}
           renderItem={(t, i) => (
             <ListRow
-              key={t.teachingAssignmentId ?? i}
+              key={t.subjectAllocationId ?? i}
               primary={t.subjectName || 'Untitled subject'}
               meta={`${t.className || 'No class'} · ${t.sectionName || 'No section'}`}
             />
