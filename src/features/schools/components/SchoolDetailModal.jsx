@@ -6,6 +6,8 @@ import { getApiErrorMessage } from '../../../shared/apiError';
 import { listPrincipals } from '../../principals';
 import {
   getSchool,
+  listSchoolSubjects,
+  listSchoolClasses,
   assignPrincipal,
   unassignPrincipal,
   activateSchool,
@@ -30,6 +32,8 @@ const idOf = (o) => o?._id ?? o?.id ?? o;
 export function SchoolDetailModal({ open, school, onClose, onChanged }) {
   const schoolId = idOf(school);
   const [data, setData] = useState(null); // fresh school detail
+  const [classes, setClasses] = useState([]); // school's classes (own endpoint)
+  const [subjects, setSubjects] = useState([]); // school's subjects (own endpoint)
   const [principals, setPrincipals] = useState([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,8 +46,15 @@ export function SchoolDetailModal({ open, school, onClose, onChanged }) {
 
   const refresh = useCallback(async () => {
     if (!schoolId) return;
-    const fresh = await getSchool(schoolId);
+    // getSchool() doesn't embed classes/subjects, so fetch them on their own.
+    const [fresh, cls, subs] = await Promise.all([
+      getSchool(schoolId),
+      listSchoolClasses(schoolId),
+      listSchoolSubjects(schoolId),
+    ]);
     setData(fresh);
+    setClasses(Array.isArray(cls) ? cls : []);
+    setSubjects(Array.isArray(subs) ? subs : []);
   }, [schoolId]);
 
   useEffect(() => {
@@ -54,6 +65,8 @@ export function SchoolDetailModal({ open, school, onClose, onChanged }) {
     setLevel('');
     setSection({ name: '', classId: '' });
     setData(school ?? null);
+    setClasses([]);
+    setSubjects([]);
     let active = true;
     refresh().catch(() => active && setError('Could not load the school.'));
     listPrincipals()
@@ -81,8 +94,6 @@ export function SchoolDetailModal({ open, school, onClose, onChanged }) {
 
   const principal = data?.principal && typeof data.principal === 'object' ? data.principal : null;
   const isActive = data?.isActive !== false;
-  const classes = Array.isArray(data?.classes) ? data.classes : [];
-  const subjects = Array.isArray(data?.subjects) ? data.subjects : [];
 
   return (
     <Modal open={open} onClose={onClose} title={data?.name || school?.name || 'School'} size="lg">

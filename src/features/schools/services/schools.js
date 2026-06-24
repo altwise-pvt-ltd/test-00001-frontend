@@ -50,6 +50,19 @@ export async function unassignPrincipal(id) {
   return data.data;
 }
 
+// Admin-targeted reads — a school's subjects/classes for the Quick setup panel.
+// getSchool() does not embed these, so they're fetched on their own. Same
+// endpoints the principal uses, scoped to :id for the super-admin.
+export async function listSchoolSubjects(id) {
+  const { data } = await http.get(`/schools/${id}/subjects`);
+  return data.data;
+}
+
+export async function listSchoolClasses(id) {
+  const { data } = await http.get(`/schools/${id}/classes`);
+  return data.data;
+}
+
 // Admin-targeted setup — create resources for a specific school without being
 // its principal. Mirrors the principal's /subjects, /classes, /sections.
 export async function createSchoolSubject(id, payload) {
