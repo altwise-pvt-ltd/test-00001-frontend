@@ -190,7 +190,7 @@ export function SchoolDetailModal({ open, school, onClose, onChanged }) {
               value={subj.code}
               onChange={(e) => setSubj((s) => ({ ...s, code: e.target.value.toUpperCase() }))}
               placeholder="CODE"
-              className={`${inputCls} max-w-[8rem]`}
+              className={`${inputCls} max-w-32`}
             />
             <button
               type="button"
@@ -278,7 +278,7 @@ export function SchoolDetailModal({ open, school, onClose, onChanged }) {
             value={section.name}
             onChange={(e) => setSection((s) => ({ ...s, name: e.target.value }))}
             placeholder="Section (e.g. A)"
-            className={`${inputCls} max-w-[10rem]`}
+            className={`${inputCls} max-w-40`}
           />
           <button
             type="button"
